@@ -1,0 +1,87 @@
+# Create a PR that adds docs/README.md with overview and links.
+# Trigger: manual (workflow_dispatch)
+# Permissions: write for contents & pull-requests so the action can push and request reviewers.
+name: Create docs/README.md PR
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  create-readme-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create docs/README.md
+        run: |
+          mkdir -p docs
+          cat > docs/README.md <<'EOF'
+# OctoAcme Project Management Documentation
+
+Welcome — this folder contains OctoAcme's project management processes and templates. Use this README as the single entry point to understand how we plan, run, and improve projects.
+
+## Brief overview of OctoAcme project management
+OctoAcme runs projects with a customer-first, iterative approach. Key ideas:
+- Deliver value in small, testable increments and iterate based on evidence.
+- Define clear roles and outcomes (Project Manager, Product Lead, Developers, QA, Stakeholders).
+- Follow an end-to-end lifecycle: Initiation → Planning → Execution → Release → Retrospective.
+- Proactively manage risks and dependencies with a lightweight risk register.
+- Document decisions, acceptance criteria, and action items in the project repo for transparency and onboarding.
+
+Core workflows at a glance:
+- Initiation: validate problem, confirm stakeholders, produce a One-pager to decide go/no-go.
+- Planning: prioritize backlog, estimate work, create release/milestone plan and Definition of Done.
+- Execution: follow the project board and PR workflow, run CI/tests, and monitor key metrics.
+- Release: follow deployment checklist, run smoke checks, and announce/verify post-deploy.
+- Retrospectives: run blameless reviews, track action items, and feed improvements back into the backlog.
+
+## 📚 Docs index
+- [Project Management Overview](./octoacme-project-management-overview.md)
+- [Project Initiation Guide](./octoacme-project-initiation.md)
+- [Project Planning](./octoacme-project-planning.md)
+- [Execution & Tracking](./octoacme-execution-and-tracking.md)
+- [Risk Management & Communication](./octoacme-risks-and-communication.md)
+- [Release & Deployment Guide](./octoacme-release-and-deployment.md)
+- [Retrospective & Continuous Improvement](./octoacme-retrospective-and-continuous-improvement.md)
+- [Roles and Personas](./octoacme-roles-and-personas.md)
+
+## How to use these docs
+- Keep the Project One-pager and key artifacts (risk register, release notes, retros) in each project repo under docs/ or .copilot/ for Copilot Spaces to consume.
+- Link to the most current status from the project README for stakeholders.
+- When adding or changing process docs, use the repository's issue template: .github/ISSUE_TEMPLATE/add-update-content-to-process-docs.yml
+
+## Acceptance checklist (for this README)
+- [ ] Content aligns with existing process docs
+- [ ] Update improves discoverability / onboarding
+- [ ] Stakeholder review completed (if required)
+
+If you'd like this README shortened, expanded, or to include a diagram, tell me what to change and I will prepare an updated file and PR body.
+EOF
+          # Commit changes if any
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/README.md
+          git commit -m "docs: add docs/README.md — overview and links to OctoAcme project management docs" || echo "No changes to commit"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: docs/add-project-management-readme
+          title: "[Process Doc Update]: Add README with summary and links to docs for OctoAcme Project Management processes"
+          body: |
+            This PR adds docs/README.md as a single entry point that summarizes OctoAcme project management processes and links to the detailed docs.
+
+            Related to: #2
+
+            Acceptance checklist:
+            - [x] Content aligns with existing process docs
+            - [x] Update improves discoverability / onboarding
+            - [x] Stakeholder review completed (if required)
+          labels: documentation,process improvement
+          reviewers: FranDelgadillo
